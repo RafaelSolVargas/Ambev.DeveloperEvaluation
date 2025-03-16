@@ -1,3 +1,4 @@
+using Ambev.DeveloperEvaluation.Application.Products.CreateProduct;
 using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Bogus;
 
