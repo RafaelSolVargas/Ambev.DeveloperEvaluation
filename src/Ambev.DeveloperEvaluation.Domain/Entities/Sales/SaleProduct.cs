@@ -13,24 +13,28 @@ public class SaleProduct : BaseEntity
     /// <summary>
     /// Gets the ID of the sale associated with this product.
     /// </summary>
-    public Guid SaleId { get; private set; }
+    public Guid SaleId { get; set; }
 
     /// <summary>
     /// Gets the ID of the product.
     /// </summary>
-    public Guid ProductId { get; private set; }
+    public Guid ProductId { get; set; }
+
+    public Sale Sale { get; set; } = null!;
+    
+    public Product Product { get; set; } = null!;
 
     /// <summary>
     /// Gets the quantity of the product sold.
     /// Must be greater than zero and cannot exceed 20.
     /// </summary>
-    public int Quantity { get; private set; }
+    public int Quantity { get; set; }
 
     /// <summary>
     /// Gets the unit price of the product.
     /// Must be greater than zero.
     /// </summary>
-    public decimal UnitPrice { get; private set; }
+    public decimal UnitPrice { get; set; }
 
     /// <summary>
     /// Gets the percentage discount applied to the product.
@@ -48,23 +52,23 @@ public class SaleProduct : BaseEntity
     /// Gets the total cost of the product after applying discounts.
     /// This value is calculated automatically.
     /// </summary>
-    public decimal TotalCost { get; private set; }
+    public decimal TotalCost { get; set; }
 
     /// <summary>
     /// Gets the date and time when the product was sold.
     /// Cannot be in the future.
     /// </summary>
-    public DateTime DateSold { get; private set; }
+    public DateTime DateSold { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Gets the date and time when the sale product was created.
     /// </summary>
-    public DateTime CreatedAt { get; private set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Gets the date and time of the last update to the sale product's information.
     /// </summary>
-    public DateTime? UpdatedAt { get; private set; }
+    public DateTime? UpdatedAt { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SaleProduct"/> class.
@@ -83,7 +87,8 @@ public class SaleProduct : BaseEntity
         decimal unitPrice,
         decimal percentageDiscount,
         decimal fixedDiscount,
-        DateTime dateSold)
+        DateTime dateSold,
+        Product product)
     {
         SaleId = saleId;
         ProductId = productId;
@@ -95,7 +100,10 @@ public class SaleProduct : BaseEntity
         CreatedAt = DateTime.UtcNow;
 
         CalculateTotalCost();
+        Product = product;
     }
+
+    public SaleProduct() { }
 
     /// <summary>
     /// Calculates the total cost of the product after applying discounts.

@@ -14,23 +14,23 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         /// Gets the name of the branch.
         /// Must not be null or empty and should have a minimum length of 3 characters.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets the address of the branch.
         /// Must not be null or empty and should have a maximum length of 200 characters.
         /// </summary>
-        public string Address { get; private set; }
+        public string Address { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets the date and time when the branch was created.
         /// </summary>
-        public DateTime CreatedAt { get; private set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Gets the date and time of the last update to the branch's information.
         /// </summary>
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Branch"/> class.
@@ -43,6 +43,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             Address = address;
             CreatedAt = DateTime.UtcNow;
         }
+
+        public Branch() { }
 
         /// <summary>
         /// Updates the branch's information.

@@ -14,18 +14,18 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
         /// Gets the name of the product.
         /// Must not be null or empty and should have a minimum length of 3 characters.
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the description of the product.
         /// Must not be null or empty and should have a maximum length of 500 characters.
         /// </summary>
-        public string Description { get; private set; }
+        public string Description { get; private set; } = string.Empty;
 
         /// <summary>
         /// Gets the date and time when the product was created.
         /// </summary>
-        public DateTime CreatedAt { get; private set; }
+        public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Gets the date and time of the last update to the product's information.
@@ -43,6 +43,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
             Description = description;
             CreatedAt = DateTime.UtcNow;
         }
+
+        public Product() { }
 
         /// <summary>
         /// Updates the product's information.

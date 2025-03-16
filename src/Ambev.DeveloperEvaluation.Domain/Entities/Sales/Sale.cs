@@ -13,42 +13,42 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
         /// <summary>
         /// Gets the ID of the client associated with the sale.
         /// </summary>
-        public Guid ClientId { get; private set; }
+        public Guid ClientId { get; set; }
 
         /// <summary>
         /// Gets the ID of the branch where the sale was made.
         /// </summary>
-        public Guid BranchId { get; private set; }
+        public Guid BranchId { get; set; }
 
         /// <summary>
         /// Gets the list of products sold in the sale.
         /// </summary>
-        public List<SaleProduct> Products { get; private set; }
+        public ICollection<SaleProduct> SaleProducts { get; set; } = [];
 
         /// <summary>
         /// Gets the status of the sale (e.g., NotCancelled, Cancelled).
         /// </summary>
-        public SaleStatus Status { get; private set; }
+        public SaleStatus Status { get; set; } = SaleStatus.NotCancelled;
 
         /// <summary>
         /// Gets the sale number.
         /// </summary>
-        public string Number { get; private set; }
+        public string Number { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets the date and time when the sale was made.
         /// </summary>
-        public DateTime DateSold { get; private set; }
+        public DateTime DateSold { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Gets the date and time when the sale was created.
         /// </summary>
-        public DateTime CreatedAt { get; private set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Gets the date and time of the last update to the sale's information.
         /// </summary>
-        public DateTime? UpdatedAt { get; private set; }
+        public DateTime? UpdatedAt { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Sale"/> class.
@@ -71,8 +71,10 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
             DateSold = dateSold;
             Status = SaleStatus.NotCancelled;
             CreatedAt = DateTime.UtcNow;
-            Products = ApplyDiscounts(products ?? throw new ArgumentNullException(nameof(products)));
+            SaleProducts = ApplyDiscounts(products ?? throw new ArgumentNullException(nameof(products)));
         }
+
+        public Sale() { }
 
         /// <summary>
         /// Applies discounts to the products based on the business rules.

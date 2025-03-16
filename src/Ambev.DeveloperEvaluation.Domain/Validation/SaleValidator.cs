@@ -21,10 +21,10 @@ public class SaleValidator : AbstractValidator<Sale>
             .NotEmpty().WithMessage("A data da venda não pode estar vazia.")
             .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("A data da venda não pode ser no futuro.");
 
-        RuleFor(sale => sale.Products)
+        RuleFor(sale => sale.SaleProducts)
             .NotEmpty().WithMessage("A venda deve conter pelo menos um produto.");
 
-        RuleForEach(sale => sale.Products)
+        RuleForEach(sale => sale.SaleProducts)
             .SetValidator(new SaleProductValidator());
     }
 }
