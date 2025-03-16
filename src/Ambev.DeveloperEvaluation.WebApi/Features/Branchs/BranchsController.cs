@@ -1,10 +1,8 @@
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
-using Ambev.DeveloperEvaluation.WebApi.Common;
 using Ambev.DeveloperEvaluation.WebApi.Features.Branchs.CreateBranch;
 using Ambev.DeveloperEvaluation.Application.Branchs.CreateBranch;
-using Microsoft.AspNetCore.Authorization;
+using Ambev.DeveloperEvaluation.WebApi.Common;
+using Microsoft.AspNetCore.Mvc;
+using MediatR;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Branchs;
 
@@ -13,7 +11,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Branchs;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class BranchsController(IMediator _mediator, IMapper _mapper) : BaseController
+public class BranchsController(IMediator _mediator) : BaseController
 {
     [HttpPost]
     [ProducesResponseType(typeof(ApiResponseWithData<CreateBranchResponse>), StatusCodes.Status200OK)]

@@ -50,6 +50,8 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
         /// </summary>
         public DateTime? UpdatedAt { get; set; }
 
+        public decimal TotalCost => SaleProducts.Sum(x => x.TotalCost);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Sale"/> class.
         /// </summary>
