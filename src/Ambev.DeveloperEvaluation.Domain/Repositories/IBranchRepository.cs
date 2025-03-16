@@ -1,11 +1,10 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 
 namespace Ambev.DeveloperEvaluation.Domain.Repositories;
 
-public interface IBranchRepository : IGetByIdRepository<Sale>,
-    IGetAllRepository<Sale>,
-    ICreateRepository<Sale>
+public interface IBranchRepository : IGetByIdRepository<Branch>,
+    IGetAllRepository<Branch>,
+    ICreateRepository<Branch>
 {
     Task<Branch?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 }

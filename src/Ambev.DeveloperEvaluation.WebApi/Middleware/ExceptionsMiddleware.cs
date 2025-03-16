@@ -28,10 +28,55 @@ namespace Ambev.DeveloperEvaluation.WebApi.Middleware
             {
                 await HandleValidationExceptionAsync(context, ex);
             }
+            catch (InvalidOperationException ex)
+            {
+                await HandleInvalidOperationExceptionAsync(context, ex);
+            }
             catch (KeyNotFoundException ex)
             {
                 await HandleKeyNotFoundExceptionAsync(context, ex);
             }
+            catch (Exception ex)
+            {
+                HandleDefaultExceptionAsync(context, ex);
+            }
+        }
+
+        private static void HandleDefaultExceptionAsync(HttpContext context, Exception exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = $"Internal Error: {exception.Message}",
+                Errors = [ ]
+            };
+
+            context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonSerializerOptions));
+        }
+
+        private static Task HandleInvalidOperationExceptionAsync(HttpContext context, InvalidOperationException exception)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+            var response = new ApiResponse
+            {
+                Success = false,
+                Message = "Invalid operation",
+                Errors =
+                [
+                    new ValidationErrorDetail()
+                    {
+                        Detail = "Invalid operation",
+                        Error = exception.Message
+                    }
+                ]
+            };
+
+            return context.Response.WriteAsync(JsonSerializer.Serialize(response, JsonSerializerOptions));
         }
 
         private static Task HandleValidationExceptionAsync(HttpContext context, ValidationException exception)
