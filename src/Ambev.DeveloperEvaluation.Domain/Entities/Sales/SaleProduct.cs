@@ -100,7 +100,7 @@ public class SaleProduct : BaseEntity
         decimal percentageDiscount,
         decimal fixedDiscount,
         DateTime dateSold,
-        Product product)
+        Product? product)
     {
         SaleId = saleId;
         ProductId = productId;
@@ -112,7 +112,7 @@ public class SaleProduct : BaseEntity
         CreatedAt = DateTime.UtcNow;
 
         CalculateTotalCost();
-        Product = product;
+        Product = product!;
     }
 
     public SaleProduct() { }

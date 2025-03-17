@@ -93,8 +93,58 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
 
         var result = await mediator.Send(query, cancellationToken);
 
-        var response = mapper.Map<List<GetSaleByIdResponse>>(result);
+        var itens = mapper.Map<List<GetSaleByIdResponse>>(result);
 
-        return Ok(response);
+        return OkPaginated(result.ConvertToType(itens));
+    }
+
+    [HttpGet("branch/{branchId}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<List<GetSaleByIdResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllSalesByBranch(
+    [FromRoute] Guid branchId,
+    [FromQuery] string? sortBy = null,
+    [FromQuery] bool ascending = true,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllSalesQuery
+        {
+            Page = 1,
+            PageSize = int.MaxValue,
+            SortBy = sortBy,
+            Ascending = ascending,
+            BranchId = branchId,
+        };
+
+        var result = await mediator.Send(query, cancellationToken);
+
+        var itens = mapper.Map<List<GetSaleByIdResponse>>(result);
+
+        return OkPaginated(result.ConvertToType(itens));
+    }
+
+    [HttpGet("customer/{customerId}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<List<GetSaleByIdResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllSalesByCostumer(
+    [FromRoute] Guid customerId,
+    [FromQuery] string? sortBy = null,
+    [FromQuery] bool ascending = true,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new GetAllSalesQuery
+        {
+            Page = 1,
+            PageSize = int.MaxValue,
+            SortBy = sortBy,
+            Ascending = ascending,
+            CustomerId = customerId
+        };
+
+        var result = await mediator.Send(query, cancellationToken);
+
+        var itens = mapper.Map<List<GetSaleByIdResponse>>(result);
+
+        return OkPaginated(result.ConvertToType(itens));
     }
 }

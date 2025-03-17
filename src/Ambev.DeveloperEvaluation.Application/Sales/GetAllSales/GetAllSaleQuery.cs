@@ -1,9 +1,10 @@
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
+using Ambev.DeveloperEvaluation.Common.Pagination;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetAllSales;
 
-public class GetAllSalesQuery : IRequest<List<GetSaleByIdResult>>
+public class GetAllSalesQuery : IRequest<PaginatedList<GetSaleByIdResult>>
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Common;
+namespace Ambev.DeveloperEvaluation.Common.Pagination;
 
 public class PaginatedList<T> : List<T>
 {
@@ -27,5 +27,10 @@ public class PaginatedList<T> : List<T>
         var count = await source.CountAsync();
         var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         return new PaginatedList<T>(items, count, pageNumber, pageSize);
+    }
+
+    public PaginatedList<T1> ConvertToType<T1>(List<T1> itens)
+    {
+        return new PaginatedList<T1>(itens, Count, CurrentPage, PageSize);
     }
 }

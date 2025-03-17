@@ -3,6 +3,7 @@ using Ambev.DeveloperEvaluation.Common.Extensions;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
+using Ambev.DeveloperEvaluation.Common.Pagination;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetAllSales
 {
@@ -10,9 +11,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetAllSales
       ISaleRepository saleRepository,
       IUserRepository userRepository,
       IBranchRepository branchRepository,
-      IProductRepository productRepository) : IRequestHandler<GetAllSalesQuery, List<GetSaleByIdResult>>
+      IProductRepository productRepository) : IRequestHandler<GetAllSalesQuery, PaginatedList<GetSaleByIdResult>>
     {
-        public async Task<List<GetSaleByIdResult>> Handle(GetAllSalesQuery query, CancellationToken cancellationToken)
+        public async Task<PaginatedList<GetSaleByIdResult>> Handle(GetAllSalesQuery query, CancellationToken cancellationToken)
         {
             // Consulta base
             var salesQuery = saleRepository.GetAll()
@@ -48,52 +49,34 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetAllSales
                     : salesQuery.OrderBy(query.SortBy, ascending: false);
             }
 
-            // Aplica paginação
-            var sales = await salesQuery
-                .Skip((query.Page - 1) * query.PageSize)
-                .Take(query.PageSize)
-                .ToListAsync(cancellationToken);
-
-            // Mapeia os resultados
-            var result = new List<GetSaleByIdResult>();
-            foreach (var sale in sales)
+            // Mapeia os resultados para GetSaleByIdResult
+            var resultQuery = salesQuery.Select(s => new GetSaleByIdResult
             {
-                var customer = await userRepository.GetByIdAsync(sale.ClientId, cancellationToken);
-                var branch = await branchRepository.GetByIdAsync(sale.BranchId, cancellationToken);
-
-                var productsResponse = new List<GetSaleProductResult>();
-                foreach (var saleProduct in sale.SaleProducts)
+                Id = s.Id,
+                Number = s.Number,
+                DateSold = s.DateSold,
+                Customer = userRepository.GetByIdAsync(s.ClientId, cancellationToken).Result,
+                Branch = branchRepository.GetByIdAsync(s.BranchId, cancellationToken).Result,
+                Products = s.SaleProducts.Select(sp => new GetSaleProductResult
                 {
-                    var product = await productRepository.GetByIdAsync(saleProduct.ProductId, cancellationToken);
+                    ProductId = sp.ProductId,
+                    Quantity = sp.Quantity,
+                    UnitPrice = sp.UnitPrice,
+                    FixedDiscount = sp.FixedDiscount,
+                    PercentualDiscount = sp.PercentageDiscount,
+                    TotalDiscount = sp.TotalDiscount,
+                    TotalCost = sp.TotalCostWithDiscount,
+                    TotalCostWithDiscount = sp.TotalCostWithDiscount,
+                    Product = productRepository.GetByIdAsync(sp.ProductId, cancellationToken).Result
+                }).ToList(),
+                CreatedAt = s.CreatedAt,
+                UpdatedAt = s.UpdatedAt
+            });
 
-                    productsResponse.Add(new GetSaleProductResult
-                    {
-                        ProductId = saleProduct.ProductId,
-                        Quantity = saleProduct.Quantity,
-                        UnitPrice = saleProduct.UnitPrice,
-                        FixedDiscount = saleProduct.FixedDiscount,
-                        PercentualDiscount = saleProduct.PercentageDiscount,
-                        TotalDiscount = saleProduct.TotalDiscount,
-                        TotalCost = saleProduct.TotalCostWithDiscount,
-                        TotalCostWithDiscount = saleProduct.TotalCostWithDiscount,
-                        Product = product
-                    });
-                }
+            // Aplica paginação e retorna a lista paginada
+            var paginatedResult = await PaginatedList<GetSaleByIdResult>.CreateAsync(resultQuery, query.Page, query.PageSize);
 
-                result.Add(new GetSaleByIdResult
-                {
-                    Id = sale.Id,
-                    Number = sale.Number,
-                    DateSold = sale.DateSold,
-                    Customer = customer,
-                    Branch = branch,
-                    Products = productsResponse,
-                    CreatedAt = sale.CreatedAt,
-                    UpdatedAt = sale.UpdatedAt
-                });
-            }
-
-            return result;
+            return paginatedResult;
         }
     }
 }
