@@ -7,6 +7,7 @@ using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.ORM.Repositories;
 using Ambev.DeveloperEvaluation.ORM;
 using NSubstitute;
+using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
@@ -29,8 +30,9 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
             var userRepository = Substitute.For<IUserRepository>();
             var branchRepository = Substitute.For<IBranchRepository>();
             var productRepository = Substitute.For<IProductRepository>();
+            var mapper = Substitute.For<IMapper>();
 
-            _handler = new GetAllSalesHandler(saleRepository, userRepository, branchRepository, productRepository);
+            _handler = new GetAllSalesHandler(saleRepository, userRepository, branchRepository, productRepository, mapper);
         }
 
         public void Dispose()

@@ -1,5 +1,3 @@
-using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale;
@@ -14,8 +12,8 @@ public class GetSaleByIdResult
     public Guid Id { get; set; }
     public string Number { get; set; } = string.Empty;
     public DateTime DateSold { get; set; }
-    public User? Customer { get; set; }
-    public Branch? Branch { get; set; }
+    public GetCustomerResult? Customer { get; set; }
+    public GetBranchResult? Branch { get; set; }
     public int ProductsCount => Products.Count;
     public decimal TotalCost => Products.Sum(x => x.TotalCost);
     public decimal TotalCostWithDiscount => Products.Sum(x => x.TotalCostWithDiscount);
@@ -23,6 +21,26 @@ public class GetSaleByIdResult
     public List<GetSaleProductResult> Products { get; set; } = [];
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+}
+
+public class GetBranchResult
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+}
+
+public class GetCustomerResult
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
+
+public class GetProductResult
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
 }
 
 public class GetSaleProductResult
@@ -35,5 +53,5 @@ public class GetSaleProductResult
     public decimal TotalDiscount { get; set; }
     public decimal TotalCost { get; set; }
     public decimal TotalCostWithDiscount { get; set; }
-    public Product? Product { get; set; }
+    public GetProductResult? Product { get; set; }
 }

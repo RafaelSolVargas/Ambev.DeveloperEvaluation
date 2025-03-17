@@ -7,6 +7,7 @@ using Ambev.DeveloperEvaluation.WebApi.Common;
 using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using MediatR;
+using Ambev.DeveloperEvaluation.Common.Pagination;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -66,7 +67,7 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(ApiResponseWithData<List<GetSaleByIdResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseWithData<ApiResponseWithData<PaginatedList<GetSaleByIdResponse>>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllSales(
         [FromQuery] int page = 1,
@@ -93,13 +94,15 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
 
         var result = await mediator.Send(query, cancellationToken);
 
-        var itens = mapper.Map<List<GetSaleByIdResponse>>(result);
+        var itens = mapper.Map<List<GetSaleByIdResponse>>(result.ToList());
 
-        return OkPaginated(result.ConvertToType(itens));
+        var response = result.ConvertToType(itens);
+
+        return OkPaginated(response);
     }
 
     [HttpGet("branch/{branchId}")]
-    [ProducesResponseType(typeof(ApiResponseWithData<List<GetSaleByIdResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseWithData<ApiResponseWithData<PaginatedList<GetSaleByIdResponse>>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllSalesByBranch(
     [FromRoute] Guid branchId,
@@ -124,7 +127,7 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
     }
 
     [HttpGet("customer/{customerId}")]
-    [ProducesResponseType(typeof(ApiResponseWithData<List<GetSaleByIdResponse>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponseWithData<ApiResponseWithData<PaginatedList<GetSaleByIdResponse>>>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllSalesByCostumer(
     [FromRoute] Guid customerId,

@@ -8,8 +8,8 @@ public class GetSaleByIdResponse
     public Guid Id { get; set; }
     public string Number { get; set; } = string.Empty;
     public DateTime DateSold { get; set; }
-    public User? Customer { get; set; }
-    public Branch? Branch { get; set; }
+    public GetCustomerResponse? Customer { get; set; }
+    public GetBranchResponse? Branch { get; set; }
     public int ProductsCount => Products.Count;
     public decimal TotalCost => Products.Sum(x => x.TotalCost);
     public decimal TotalCostWithDiscount => Products.Sum(x => x.TotalCostWithDiscount);
@@ -30,5 +30,25 @@ public class GetSaleProductResponse
     public decimal TotalDiscount { get; set; }
     public decimal TotalCost { get; set; }
     public decimal TotalCostWithDiscount { get; set; }
-    public Product? Product { get; set; }
+    public GetProductResponse? Product { get; set; }
+}
+
+public class GetBranchResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+}
+
+public class GetCustomerResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+}
+
+public class GetProductResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
 }

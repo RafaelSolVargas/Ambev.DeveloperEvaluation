@@ -93,6 +93,7 @@ public class SaleProduct : BaseEntity
     /// <param name="fixedDiscount">The fixed discount applied to the product.</param>
     /// <param name="dateSold">The date and time when the product was sold.</param>
     public SaleProduct(
+        Guid id,
         Guid saleId,
         Guid productId,
         int quantity,
@@ -102,6 +103,7 @@ public class SaleProduct : BaseEntity
         DateTime dateSold,
         Product? product)
     {
+        Id = id;
         SaleId = saleId;
         ProductId = productId;
         Quantity = quantity;

@@ -19,6 +19,16 @@ public class SaleProfile : Profile
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
             .ForMember(dest => dest.Products, opt => opt.MapFrom(src => src.Products));
 
+        CreateMap<GetCustomerResult, GetCustomerResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email));
+
+        CreateMap<GetBranchResult, GetBranchResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
+            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
+
         CreateMap<GetSaleProductResult, GetSaleProductResponse>()
             .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
             .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
@@ -29,6 +39,10 @@ public class SaleProfile : Profile
             .ForMember(dest => dest.TotalCost, opt => opt.MapFrom(src => src.TotalCost))
             .ForMember(dest => dest.TotalCostWithDiscount, opt => opt.MapFrom(src => src.TotalCostWithDiscount))
             .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
+
+        CreateMap<GetProductResult, GetProductResponse>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
 
         CreateMap<CreateSaleResult, CreateSaleResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -43,5 +57,6 @@ public class SaleProfile : Profile
             .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
             .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
             .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice));
+
     }
 }

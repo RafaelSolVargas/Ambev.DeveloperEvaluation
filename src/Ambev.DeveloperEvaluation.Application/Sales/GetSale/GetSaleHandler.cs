@@ -1,4 +1,5 @@
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using AutoMapper;
 using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
@@ -7,7 +8,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
         ISaleRepository saleRepository,
         IUserRepository userRepository,
         IProductRepository productRepository,
-        IBranchRepository branchRepository) : IRequestHandler<GetSaleByIdQuery, GetSaleByIdResult?>
+        IBranchRepository branchRepository,
+        IMapper mapper) : IRequestHandler<GetSaleByIdQuery, GetSaleByIdResult?>
     {
         public async Task<GetSaleByIdResult?> Handle(GetSaleByIdQuery query, CancellationToken cancellationToken)
         {
@@ -38,7 +40,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
                     TotalDiscount = saleProduct.TotalDiscount,
                     TotalCost = saleProduct.TotalCostWithDiscount,
                     TotalCostWithDiscount = saleProduct.TotalCostWithDiscount,
-                    Product = product // Adicionado
+                    Product = mapper.Map<GetProductResult>(product)
                 });
             }
 
@@ -48,8 +50,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
                 Id = sale.Id,
                 Number = sale.Number,
                 DateSold = sale.DateSold,
-                Customer = customer,
-                Branch = branch,
+                Customer = mapper.Map<GetCustomerResult>(customer),
+                Branch = mapper.Map<GetBranchResult>(branch),
                 Products = productsResponse,
                 CreatedAt = sale.CreatedAt,
                 UpdatedAt = sale.UpdatedAt

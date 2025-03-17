@@ -31,6 +31,9 @@ public class PaginatedList<T> : List<T>
 
     public PaginatedList<T1> ConvertToType<T1>(List<T1> itens)
     {
-        return new PaginatedList<T1>(itens, Count, CurrentPage, PageSize);
+        return new PaginatedList<T1>(itens, TotalCount, CurrentPage, PageSize)
+        {
+            TotalPages = TotalPages
+        };
     }
 }

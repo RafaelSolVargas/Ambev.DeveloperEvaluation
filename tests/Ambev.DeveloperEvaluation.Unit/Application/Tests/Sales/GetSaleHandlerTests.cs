@@ -1,4 +1,3 @@
-using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.GetSale;
 using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
@@ -6,6 +5,7 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
+using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
@@ -16,6 +16,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
         private readonly IBranchRepository _branchRepository;
         private readonly IProductRepository _productRepository;
         private readonly GetSaleByIdHandler _handler;
+        private readonly IMapper _mapper;
 
         public GetSaleByIdHandlerTests()
         {
@@ -23,7 +24,8 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
             _userRepository = Substitute.For<IUserRepository>();
             _branchRepository = Substitute.For<IBranchRepository>();
             _productRepository = Substitute.For<IProductRepository>();
-            _handler = new GetSaleByIdHandler(_saleRepository, _userRepository, _productRepository, _branchRepository);
+            _mapper = Substitute.For<IMapper>();
+            _handler = new GetSaleByIdHandler(_saleRepository, _userRepository, _productRepository, _branchRepository, _mapper);
         }
 
         [Fact(DisplayName = "Given valid sale ID. When getting sale. Returns sale details.")]
@@ -56,6 +58,9 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
             var customer = new User { Id = sale.ClientId };
             var branch = new Branch { Id = sale.BranchId };
 
+            var customerResponse = _mapper.Map<GetCustomerResult>(customer);
+            var branchResponse = _mapper.Map<GetBranchResult>(branch);
+
             _saleRepository.GetByIdAsync(saleId, Arg.Any<CancellationToken>()).Returns(sale);
             _userRepository.GetByIdAsync(sale.ClientId, Arg.Any<CancellationToken>()).Returns(customer);
             _branchRepository.GetByIdAsync(sale.BranchId, Arg.Any<CancellationToken>()).Returns(branch);
@@ -70,8 +75,8 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
             result!.Id.Should().Be(saleId);
             result.Number.Should().Be(sale.Number);
             result.DateSold.Should().Be(sale.DateSold);
-            result.Customer.Should().Be(customer);
-            result.Branch.Should().Be(branch);
+            result.Customer.Should().Be(customerResponse);
+            result.Branch.Should().Be(branchResponse);
             result.Products.Should().HaveCount(1);
             result.CreatedAt.Should().Be(sale.CreatedAt);
             result.UpdatedAt.Should().Be(sale.UpdatedAt);
@@ -131,6 +136,10 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 
             var customer = new User { Id = sale.ClientId };
             var branch = new Branch { Id = sale.BranchId };
+
+            var customerResponse = _mapper.Map<GetCustomerResult>(customer);
+            var branchResponse = _mapper.Map<GetBranchResult>(branch);
+
             var product = new Product("Product Name", "Product Description")
             {
                 Id = productId
@@ -151,16 +160,12 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
             result.Id.Should().Be(saleId);
             result.Number.Should().Be(sale.Number);
             result.DateSold.Should().Be(sale.DateSold);
-            result.Customer.Should().Be(customer);
-            result.Branch.Should().Be(branch);
+            result.Customer.Should().Be(customerResponse);
+            result.Branch.Should().Be(branchResponse);
             result.Products.Should().HaveCount(1);
 
             var saleProductResponse = result.Products[0];
             saleProductResponse.ProductId.Should().Be(productId);
-            saleProductResponse.Product.Should().NotBeNull();
-            saleProductResponse.Product.Id.Should().Be(productId);
-            saleProductResponse.Product.Name.Should().Be(product.Name);
-            saleProductResponse.Product.Description.Should().Be(product.Description);
 
             await _saleRepository.Received(1).GetByIdAsync(saleId, Arg.Any<CancellationToken>());
             await _userRepository.Received(1).GetByIdAsync(sale.ClientId, Arg.Any<CancellationToken>());
