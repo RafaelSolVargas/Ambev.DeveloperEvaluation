@@ -7,6 +7,8 @@ using FluentAssertions;
 using NSubstitute;
 using Xunit;
 using FluentValidation;
+using Rebus.Bus;
+using Ambev.DeveloperEvaluation.Domain.Events;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
@@ -16,13 +18,50 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
         private readonly IUserRepository _userRepository;
         private readonly IBranchRepository _branchRepository;
         private readonly CreateSaleHandler _handler;
+        private readonly IBus _bus;
 
         public CreateSaleHandlerTests()
         {
             _saleRepository = Substitute.For<ISaleRepository>();
             _userRepository = Substitute.For<IUserRepository>();
+            _bus = Substitute.For<IBus>();
             _branchRepository = Substitute.For<IBranchRepository>();
-            _handler = new CreateSaleHandler(_saleRepository, _userRepository, _branchRepository);
+            _handler = new CreateSaleHandler(_saleRepository, _userRepository, _branchRepository, _bus);
+        }
+
+        [Fact(DisplayName = "Given valid sale. When creating sale. Publishes SaleCreatedEvent")]
+        public async Task Handle_ValidRequest_PublishesSaleCreatedEvent()
+        {
+            // Given
+            var command = CreateSaleHandlerTestData.GenerateValidCommand();
+
+            // Configuração dos mocks
+            var customer = new User { Id = command.CustomerId };
+            var branch = new Branch { Id = command.BranchId };
+            var sale = new Sale(
+                command.CustomerId,
+                command.BranchId,
+                command.Number,
+                command.DateSold,
+                command.Products.ConvertAll(p => new SaleProduct
+                {
+                    ProductId = p.ProductId,
+                    Quantity = p.Quantity,
+                    UnitPrice = p.UnitPrice
+                }));
+
+            _userRepository.GetByIdAsync(command.CustomerId, Arg.Any<CancellationToken>()).Returns(customer);
+            _branchRepository.GetByIdAsync(command.BranchId, Arg.Any<CancellationToken>()).Returns(branch);
+            _saleRepository.CreateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>()).Returns(sale);
+
+            // When
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Then
+            result.Should().NotBeNull();
+
+            // Verifica se o evento SaleCreatedEvent foi publicado
+            await _bus.Received(1).Publish(Arg.Is<SaleCreatedEvent>(_ => true));
         }
 
         [Fact(DisplayName = "Given valid sale. When creating sale. Returns success response")]

@@ -156,12 +156,12 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
         return OkPaginated(result.ConvertToType(itens));
     }
 
-    [HttpPatch("ChangeStatus/{saleId}")]
+    [HttpPatch("ChangeStatus/{saleId}/{status}")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllSalesByCostumer(
     [FromRoute] Guid saleId,
-    [FromBody] SaleStatus status,
+    [FromRoute] SaleStatus status,
     CancellationToken cancellationToken = default)
     {
         var query = new ChangeSaleStatusQuery

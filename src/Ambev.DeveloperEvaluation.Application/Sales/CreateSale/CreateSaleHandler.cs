@@ -1,13 +1,16 @@
 using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using FluentValidation;
 using MediatR;
+using Rebus.Bus;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
     public class CreateSaleHandler(ISaleRepository saleRepository,
         IUserRepository userRepository,
-        IBranchRepository branchRepository) : IRequestHandler<CreateSaleCommand, CreateSaleResult>
+        IBranchRepository branchRepository,
+        IBus bus) : IRequestHandler<CreateSaleCommand, CreateSaleResult>
     {
         public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
         {
@@ -39,6 +42,14 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             _ = await branchRepository.GetByIdAsync(command.BranchId, cancellationToken) ?? throw new InvalidOperationException("Invalid BranchId passed");
 
             sale = await saleRepository.CreateAsync(sale, cancellationToken);
+
+            await bus.Publish(new SaleCreatedEvent()
+            {
+                SaleId = sale.Id,
+                ClientId = sale.BranchId,
+                DateSold = sale.DateSold,
+                TotalAmount = sale.TotalCost,
+            });
 
             return new CreateSaleResult
             {

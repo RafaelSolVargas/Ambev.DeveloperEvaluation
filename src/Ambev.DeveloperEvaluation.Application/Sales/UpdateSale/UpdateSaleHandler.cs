@@ -1,9 +1,12 @@
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using MediatR;
+using Rebus.Bus;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 {
-    public class UpdateSaleHandler(ISaleRepository _saleRepository) : IRequestHandler<UpdateSaleCommand, bool>
+    public class UpdateSaleHandler(ISaleRepository _saleRepository,
+        IBus bus) : IRequestHandler<UpdateSaleCommand, bool>
     {
         public async Task<bool> Handle(UpdateSaleCommand request, CancellationToken cancellationToken)
         {
@@ -33,6 +36,11 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             sale.DateSold = request.DateSold ?? sale.DateSold;
 
             await _saleRepository.UpdateAsync(sale, cancellationToken);
+
+            await bus.Publish(new SaleModifiedEvent()
+            {
+                SaleId = sale.Id,
+            });
 
             return true; 
         }
