@@ -49,10 +49,22 @@ public class SaleProduct : BaseEntity
     public decimal FixedDiscount { get; set; }
 
     /// <summary>
-    /// Gets the total cost of the product after applying discounts.
+    /// Gets the total discounts.
+    /// This value is calculated automatically.
+    /// </summary>
+    public decimal TotalDiscount { get; set; }
+
+    /// <summary>
+    /// Gets the total cost of the product without discounts.
     /// This value is calculated automatically.
     /// </summary>
     public decimal TotalCost { get; set; }
+
+    /// <summary>
+    /// Gets the total cost of the product after applying discounts.
+    /// This value is calculated automatically.
+    /// </summary>
+    public decimal TotalCostWithDiscount { get; set; }
 
     /// <summary>
     /// Gets the date and time when the product was sold.
@@ -110,7 +122,11 @@ public class SaleProduct : BaseEntity
     /// </summary>
     public void CalculateTotalCost()
     {
-        TotalCost = Quantity * (UnitPrice * (1 - PercentageDiscount)) - FixedDiscount;
+        TotalCost = Quantity * UnitPrice;
+        
+        TotalDiscount = (TotalCost * PercentageDiscount) + FixedDiscount;
+
+        TotalCostWithDiscount = TotalCost - TotalDiscount;
     }
 
     /// <summary>

@@ -50,7 +50,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
         /// </summary>
         public DateTime? UpdatedAt { get; set; }
 
-        public decimal TotalCost => SaleProducts.Sum(x => x.TotalCost);
+        public decimal TotalCost => SaleProducts.Sum(x => x.TotalCostWithDiscount);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Sale"/> class.
@@ -78,20 +78,22 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
 
         public Sale() { }
 
-        /// <summary>
-        /// Applies discounts to the products based on the business rules.
-        /// </summary>
-        /// <param name="products">The list of products to apply discounts to.</param>
-        /// <returns>The list of products with discounts applied.</returns>
         private static List<SaleProduct> ApplyDiscounts(List<SaleProduct> products)
         {
+            // Agrupa os produtos por ProductId e calcula a quantidade total de cada produto
+            var productQuantities = products
+                .GroupBy(p => p.ProductId)
+                .ToDictionary(g => g.Key, g => g.Sum(p => p.Quantity));
+
             foreach (var product in products)
             {
-                if (product.Quantity > 20)
+                // Verifica se a quantidade total do produto excede 20
+                if (productQuantities[product.ProductId] > 20)
                 {
                     throw new InvalidOperationException($"Não é possível vender mais de 20 unidades do produto {product.ProductId}.");
                 }
 
+                // Aplica os descontos com base na quantidade do produto individual
                 if (product.Quantity >= 10)
                 {
                     product.PercentageDiscount = 0.20m; // 20% discount
@@ -105,7 +107,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities.Sales
                     product.PercentageDiscount = 0; // No discount
                 }
 
-                // Recalculate the total cost after applying the discount
+                // Recalcula o custo total após aplicar o desconto
                 product.CalculateTotalCost();
             }
 

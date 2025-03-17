@@ -1,5 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Repositories;
+﻿using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Common;
@@ -28,6 +27,12 @@ public abstract class BaseRepository<TEntity> :
         _context = context;
         _dbSet = _context.Set<TEntity>();
     }
+
+    public IQueryable<TEntity> GetAll()
+    {
+        return _context.Set<TEntity>();
+    }
+
 
     public async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {

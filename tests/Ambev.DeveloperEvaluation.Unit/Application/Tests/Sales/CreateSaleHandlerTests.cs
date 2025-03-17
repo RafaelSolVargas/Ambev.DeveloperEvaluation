@@ -8,7 +8,7 @@ using NSubstitute;
 using Xunit;
 using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.Unit.Application
+namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
     public class CreateSaleHandlerTests
     {

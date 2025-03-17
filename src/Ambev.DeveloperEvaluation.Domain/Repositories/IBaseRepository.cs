@@ -21,6 +21,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Repositories
         Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
     }
 
+    public interface IGetQueryable<TEntity> where TEntity : class
+    {
+        IQueryable<TEntity> GetAll();
+    }
+
     public interface ICreateRepository<TEntity> where TEntity : class
     {
         /// <summary>
