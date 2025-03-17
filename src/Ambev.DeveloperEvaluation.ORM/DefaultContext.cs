@@ -29,7 +29,8 @@ namespace Ambev.DeveloperEvaluation.ORM
             modelBuilder.Entity<Sale>()
                 .HasMany(s => s.SaleProducts) // Sale tem muitos SaleProducts
                 .WithOne(sp => sp.Sale) // SaleProduct tem uma Sale
-                .HasForeignKey(sp => sp.SaleId); // Chave estrangeira em SaleProduct
+                .HasForeignKey(sp => sp.SaleId) // Chave estrangeira em SaleProduct
+                .OnDelete(DeleteBehavior.Cascade); // Configura a exclusão em cascata
 
             // Configuração do relacionamento entre SaleProduct e Product
             modelBuilder.Entity<SaleProduct>()

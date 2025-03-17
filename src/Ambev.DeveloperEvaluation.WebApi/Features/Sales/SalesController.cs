@@ -8,6 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using AutoMapper;
 using MediatR;
 using Ambev.DeveloperEvaluation.Common.Pagination;
+using Ambev.DeveloperEvaluation.Domain.Enums;
+using Ambev.DeveloperEvaluation.Application.Sales.ChangeSaleStatus;
+using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -149,5 +154,77 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
         var itens = mapper.Map<List<GetSaleByIdResponse>>(result);
 
         return OkPaginated(result.ConvertToType(itens));
+    }
+
+    [HttpPatch("ChangeStatus/{saleId}")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllSalesByCostumer(
+    [FromRoute] Guid saleId,
+    [FromBody] SaleStatus status,
+    CancellationToken cancellationToken = default)
+    {
+        var query = new ChangeSaleStatusQuery
+        {
+            Id = saleId,
+            NewStatus = status,
+        };
+
+        var result = await mediator.Send(query, cancellationToken);
+
+        if (!result)
+        {
+            return NotFound();
+        }
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteSale(
+        [FromRoute] Guid id, 
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new DeleteSaleCommand { Id = id }, cancellationToken);
+
+        return result ? NoContent() : NotFound();
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateSale(
+        [FromRoute] Guid id, 
+        [FromBody] UpdateSaleRequest request, 
+        CancellationToken cancellationToken = default)
+    {
+        var validator = new UpdateSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        if (id != request.Id)
+        {
+            return BadRequest("ID da venda não corresponde ao ID na requisição.");
+        }
+
+        var result = await mediator.Send(new UpdateSaleCommand
+        {
+            Id = request.Id,
+            BranchId = request.BranchId,
+            ClientId = request.ClientId,
+            Number = request.Number,
+            DateSold = request.DateSold,
+            Products = request.Products.Select(x => new UpdateSaleProductCommand()
+            {
+                ProductId = x.ProductId,
+                Quantity = x.Quantity,
+                SaleProductId = x.SaleProductId,
+                UnitPrice = x.UnitPrice 
+            }).ToList()
+        }, cancellationToken);
+
+        return result ? NoContent() : NotFound();
     }
 }

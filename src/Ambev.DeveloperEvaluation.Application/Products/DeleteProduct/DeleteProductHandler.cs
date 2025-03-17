@@ -3,17 +3,21 @@ using MediatR;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.DeleteProduct
 {
-    public class DeleteProductHandler(IProductRepository _productRepository) : IRequestHandler<DeleteProductCommand, bool>
+    public class DeleteProductHandler(IProductRepository _productRepository,
+        ISaleRepository saleRepository) : IRequestHandler<DeleteProductCommand, bool>
     {
         public async Task<bool> Handle(DeleteProductCommand command, CancellationToken cancellationToken)
         {
             var product = await _productRepository.GetByIdAsync(command.Id, cancellationToken);
-
-            // TODO -> Check if there isn't any sale associated with this product
-
             if (product == null)
             {
                 return false;
+            }
+
+            var existingSaleWithProduct = await saleRepository.ExistsWithProduct(command.Id, cancellationToken);
+            if (existingSaleWithProduct)
+            {
+                throw new InvalidOperationException("There is sales associated with this product, you cannot delete it");
             }
 
             await _productRepository.DeleteAsync(product.Id, cancellationToken);
