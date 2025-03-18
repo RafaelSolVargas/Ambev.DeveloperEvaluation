@@ -20,9 +20,11 @@ public class InfrastructureModuleInitializer : IModuleInitializer
         builder.Services.AddScoped<ISaleRepository, SaleRepository>();
         builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
+        var rabbitMQHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+
         // Configuração do Rebus com RabbitMQ
         builder.Services.AddRebus(configure => configure
-            .Transport(t => t.UseRabbitMq("amqp://user:password@localhost", "sale-events-queue"))
+            .Transport(t => t.UseRabbitMq($"amqp://user:password@{rabbitMQHost}", "sale-events-queue"))
             .Routing(r => r.TypeBased()
                 .Map<SaleCancelledEvent>("sale-events-queue")
                 .Map<SaleCreatedEvent>("sale-events-queue")
