@@ -21,6 +21,6 @@ public class WelcomeController : BaseController
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public IActionResult WelcomeGet()
     {
-        return Ok("Welcome to Ambev API - Post");
+        return Ok("Welcome to Ambev API - Get");
     }
 }

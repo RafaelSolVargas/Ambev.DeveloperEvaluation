@@ -55,8 +55,8 @@ Antes de começar, certifique-se de ter os seguintes softwares instalados em sua
 
 ### 1. Clonar o Repositório
 ```
-git clone https://github.com/RafaelSolVargas/ambev-developer-evaluation.git
-cd ambev-developer-evaluation
+git clone https://github.com/RafaelSolVargas/Ambev.DeveloperEvaluation.git
+cd Ambev.DeveloperEvaluation
 ```
 
 ### 2. Iniciar os Contêineres com Docker Compose
@@ -64,7 +64,12 @@ cd ambev-developer-evaluation
 O arquivo **docker-compose.yml** está na raiz do projeto. Para iniciar os serviços, execute:
 
 ```  
-docker-compose up -d 
+docker-compose -p ambev-evaluation up -d  
+```
+
+Verifique os status dos containers:
+```
+docker ps
 ```
 
 Isso levantará os seguintes serviços:
@@ -79,6 +84,8 @@ Isso levantará os seguintes serviços:
 Verifique se API foi levantada corretamente pelos endpoints:
 - **https://localhost:7182/**
 - **http://localhost:7181/**
+
+> Acesse essas URLs e verifique se foi retornado um 200 Welcome to Ambev
 
 Também verifique se o servidor da mensageira está funcionando:
 - **http://localhost:15672/**
@@ -113,8 +120,11 @@ E depois executar o database update novamente
 
 ### 1. Executar testes
 
+Foram desenvolvidos testes unitários utilizando a biblioteca xUnit junto com Faker e NSubstitute para mockar comportamentos
+de objetos externos, como cache, publisher e repositories, execute os testes por:
 
 ``` 
+cd tests/Ambev.DeveloperEvaluation.Unit
 dotnet test
 ```
 ### 2. Descrição de endpoints
@@ -152,7 +162,7 @@ Inicie sua analise fazendo uma requisição de Login com os usuários padrões:
 - POST **http://localhost:7181/api/Auth**
 ``` json
 {
-    "email": carlos.oliveira@example.com
+    "email": "carlos.oliveira@example.com",
     "password": "Senha1234!"
 }
 ```
@@ -214,7 +224,7 @@ Edite sales existentes
 
 
 
-### 1. Dados Iniciais
+### 2. Dados Iniciais
 
 Para facilitar os testes, alguns dados são inseridos automaticamente durante a mgiração. Aqui estão os IDs principais:
 
