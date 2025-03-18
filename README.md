@@ -1,9 +1,22 @@
 # Ambev Developer Evaluation
 
-Bem-vindo ao repositório da aplicação **Ambev Developer Evaluation**!
-Este projeto é uma aplicação web API desenvolvida em .NET que gerencia vendas, produtos, filiais e usuários. 
-Ele utiliza Docker para facilitar a execução e integração de todos os componentes necessários, 
-como banco de dados PostgreSQL, RabbitMQ, Redis como cache e a API em .NET 8.
+Este repositório contém uma aplicação web API desenvolvida em .NET 8 para gerenciar vendas, produtos,
+filiais e usuários. A aplicação utiliza contêineres Docker para orquestrar os componentes essenciais 
+como banco de dados PostgreSQL, RabbitMQ para mensageria, e Redis como cache. O sistema implementa 
+funcionalidades como CRUD de vendas e produtos, além de eventos assíncronos com RabbitMQ para garantir
+a comunicação entre serviços.
+
+
+---
+## Índice
+- [Visão Geral](#visão-geral)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Requisitos](#-requisitos)
+- [Configuração do Projeto](#-configuração-do-projeto)
+- [Aplicar Migrações no Banco de Dados](#-aplicar-migrações-no-banco-de-dados)
+- [Analisando o Projeto](#-analisando-o-projeto)
+- [Testando o Projeto](#-testando-o-projeto)
+- [Dados Iniciais](#-dados-iniciais)
 
 ---
 
@@ -96,7 +109,7 @@ dotnet ef database update --startup-project ../Ambev.DeveloperEvaluation.WebApi/
 ```
 E depois executar o database update novamente
 
-## 📝 Analisando o projeto
+## 🧪 Analisando o projeto
 
 ### 1. Executar testes
 
