@@ -27,12 +27,13 @@ public class BaseController : ControllerBase
         base.NotFound(new ApiResponse { Message = message, Success = false });
 
     protected IActionResult OkPaginated<T>(PaginatedList<T> pagedList) =>
-            Ok(new PaginatedResponse<T>
-            {
-                Data = pagedList,
-                CurrentPage = pagedList.CurrentPage,
-                TotalPages = pagedList.TotalPages,
-                TotalCount = pagedList.TotalCount,
-                Success = true
-            });
+        base.Ok(new
+        {
+            Data = pagedList,
+            pagedList.CurrentPage,
+            pagedList.TotalPages,
+            pagedList.TotalCount,
+            Success = true
+        });
+
 }

@@ -41,7 +41,7 @@ cd ambev-developer-evaluation
 
 ### 2. Iniciar os Contêineres com Docker Compose
 
-O arquivo ==docker-compose.yml== está na raiz do projeto. Para iniciar os serviços, execute:
+O arquivo **docker-compose.yml** está na raiz do projeto. Para iniciar os serviços, execute:
 
 ```  
 docker-compose up -d 
@@ -56,20 +56,20 @@ Isso levantará os seguintes serviços:
 ### 3. Analise as aplicações levantadas
 
 Verifique se API foi levantada corretamente pelos endpoints:
-- ==https://localhost:7182/==
-- ==http://localhost:7181/==
+- **https://localhost:7182/**
+- **http://localhost:7181/**
 
 Também verifique se o servidor da mensageira está funcionando:
 - **http://localhost:15672/**
-    - Username: ==user==
-    - Password: ==password==
+    - Username: **user**
+    - Password: **password**
 
 Teste sua conexão ao banco de dados:
-- **Host**: ==localhost==
-- **Database**: ==developer_evaluation==
-- **Port**: ==5432==
-- **User**: ==developer==
-- **Password**: ==ev@luAt10n==
+- **Host**: **localhost**
+- **Database**: **developer_evaluation**
+- **Port**: **5432**
+- **User**: **developer**
+- **Password**: **ev@luAt10n**
 
 
 ## 💰 Aplicar Migrações no Banco de Dados
@@ -122,14 +122,49 @@ dotnet test
 
 ### 1. Utilizando os endpoints
 
+
+Para testar a API, você pode utilizar a UI do Swagger que foi disponibilizada mesmo em Realease pelas URLs:
+- https://localhost:7182/swagger/index.html
+- http://localhost:7181/swagger/index.html
+
 Inicie sua analise fazendo uma requisição de Login com os usuários padrões:
-- POST ==http://localhost:7181/api/Auth==
+- POST **http://localhost:7181/api/Auth**
 ``` json
 {
     "email": carlos.oliveira@example.com
     "password": "Senha1234!"
 }
 ```
+
+
+Verifique as Sales já cadastradas:
+> GET **http://localhost:7181/api/Sales**
+
+
+Crie sales para testes, essa requisição já está com IDs fixos da aplicação, mais abaixo estarão disponíveis outros IDs também fixos.
+``` json
+{
+  "number": "NUMBERX1",
+  "dateSold": "2025-03-18T04:26:46.010Z",
+  "customerId": "ffb140dc-53be-48d5-8c6e-5d3f93271bff",
+  "branchId": "f2495571-1390-411a-9bfd-669185afea64",
+  "products": [
+    {
+      "productId": "2555343d-facf-4c33-b8a6-5fad76be36a3",
+      "quantity": 5,
+      "unitPrice": 10
+    },
+    {
+      "productId": "0f038ef4-2b67-4b7b-9454-801ab6581f54",
+      "quantity": 15,
+      "unitPrice": 18.5
+    }
+  ]
+}
+```
+
+
+
 
 ### 1. Dados Iniciais
 

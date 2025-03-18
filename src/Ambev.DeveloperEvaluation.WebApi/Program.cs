@@ -30,11 +30,14 @@ public class Program
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddDbContext<DefaultContext>(options =>
-                options.UseNpgsql(
-                    builder.Configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
-                )
-            );
+            {
+                var databaseHost = Environment.GetEnvironmentVariable("DATABASE_HOST") ?? "localhost";
+                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!
+                    .Replace("localhost", databaseHost); 
+
+                options.UseNpgsql(connectionString, b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM"));
+            });
+
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
 
