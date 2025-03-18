@@ -1,16 +1,27 @@
 # Ambev Developer Evaluation
 
-Bem-vindo ao repositório da aplicação **Ambev Developer Evaluation**! Este projeto é uma aplicação web API desenvolvida em .NET que gerencia vendas, produtos, filiais e usuários. Ele utiliza Docker para facilitar a execução e integração de todos os componentes necessários, como banco de dados PostgreSQL, MongoDB, Redis, RabbitMQ e a própria API.
+Bem-vindo ao repositório da aplicação **Ambev Developer Evaluation**!
+Este projeto é uma aplicação web API desenvolvida em .NET que gerencia vendas, produtos, filiais e usuários. 
+Ele utiliza Docker para facilitar a execução e integração de todos os componentes necessários, 
+como banco de dados PostgreSQL, RabbitMQ e a própria API.
 
-Os eventos solicitados foram implementados utilizando a biblioteca Rebus junto com RabbitMQ:
-* SaleCreated
-* SaleModified
-* SaleCancelled
+---
 
+## Visão Geral
 
-Abaixo, você encontrará instruções detalhadas sobre como configurar e executar a aplicação.
+Este projeto foi desenvolvido para avaliar habilidades de desenvolvimento, utilizando tecnologias modernas e boas práticas de engenharia de software. A aplicação é composta por uma API RESTful que gerencia operações de vendas, produtos, filiais e usuários, com suporte a mensageria via RabbitMQ para eventos como criação, modificação e cancelamento de vendas.
 
-## Pré-requisitos
+### Tecnologias Utilizadas
+
+- **.NET**: Framework principal para desenvolvimento da API.
+- **Docker**: Contêinerização da aplicação e seus serviços.
+- **PostgreSQL**: Banco de dados relacional para armazenamento de dados.
+- **RabbitMQ**: Sistema de mensageria para eventos assíncronos.
+- **Rebus**: Biblioteca para integração com RabbitMQ.
+
+---
+
+## 🔧 Requisitos
 
 Antes de começar, certifique-se de ter os seguintes softwares instalados em sua máquina:
 
@@ -18,66 +29,113 @@ Antes de começar, certifique-se de ter os seguintes softwares instalados em sua
 - **Docker Compose**: [Instale o Docker Compose](https://docs.docker.com/compose/install/)
 - **.NET SDK** (opcional, apenas se quiser rodar migrações ou executar a aplicação fora do Docker): [Instale o .NET SDK](https://dotnet.microsoft.com/download)
 
-## Configuração do Projeto
+---
 
-### 1. Clone o Repositório
+## 🛠️ Configuração do Projeto
 
-Primeiro, clone o repositório para o seu ambiente local:
-
-```bash
+### 1. Clonar o Repositório
+```
 git clone https://github.com/RafaelSolVargas/ambev-developer-evaluation.git
 cd ambev-developer-evaluation
 ```
-<hr>
 
+### 2. Iniciar os Contêineres com Docker Compose
 
-### 2. Levante os Contêineres com Docker Compose
+O arquivo ==docker-compose.yml== está na raiz do projeto. Para iniciar os serviços, execute:
 
-```bash
-docker-compose up -d
+```  
+docker-compose up -d 
 ```
-
-O arquivo docker-compose.yml se encontra no root do projeto
 
 Isso levantará os seguintes serviços:
 
-- ambev.developerevaluation.webapi: Aplicação Web API.
-- ambev.developerevaluation.database: Banco de dados PostgreSQL.
-- ambev.developerevaluation.nosql: Banco de dados MongoDB.
-- ambev.developerevaluation.cache: Servidor Redis para cache.
-- ambev.developerevaluation.rabbitmq: Servidor RabbitMQ para mensageria.
+- **ambev.developerevaluation.webapi**: Aplicação Web API.
+- **ambev.developerevaluation.database**: Banco de dados PostgreSQL.
+- **ambev.developerevaluation.rabbitmq**: Servidor RabbitMQ para mensageria.
 
-<hr>
+### 3. Analise as aplicações levantadas
 
-### 3. Aplicar Migrações no Banco de Dados
+Verifique se API foi levantada corretamente pelos endpoints:
+- ==https://localhost:7182/==
+- ==http://localhost:7181/==
 
-Após levantar os contêineres, você precisa aplicar as migrações para configurar e popular o banco de dados PostgreSQL. Navegue até o diretório do ORM e execute o seguinte comando:
+Também verifique se o servidor da mensageira está funcionando:
+- **http://localhost:15672/**
+    - Username: ==user==
+    - Password: ==password==
 
-```bash
-cd backend\src\Ambev.DeveloperEvaluation.ORM
+Teste sua conexão ao banco de dados:
+- **Host**: ==localhost==
+- **Database**: ==developer_evaluation==
+- **Port**: ==5432==
+- **User**: ==developer==
+- **Password**: ==ev@luAt10n==
+
+
+## 💰 Aplicar Migrações no Banco de Dados
+
+Para criar as tabelas e inserir dados iniciais:
+```
+cd src\Ambev.DeveloperEvaluation.ORM
 dotnet ef database update --startup-project ..\Ambev.DeveloperEvaluation.WebApi\Ambev.DeveloperEvaluation.WebApi.csproj
 ```
 
-Isso criará as tabelas e adicionará os dados iniciais ao banco de dados.
-
-Caso você queria resetar os dados fazendo a migration novamente, você pode fazer drop do banco de dados com o seguinte comando:
-```bash
-cd backend\src\Ambev.DeveloperEvaluation.ORM
-dotnet ef database drop --force --startup-project ..\Ambev.DeveloperEvaluation.WebApi\Ambev.DeveloperEvaluation.WebApi.csproj
+Caso queira resetar o banco de dados ou reiniciar o processo de migração:
+```
+cd src/Ambev.DeveloperEvaluation.ORM
+dotnet ef database drop --force --startup-project ../Ambev.DeveloperEvaluation.WebApi/Ambev.DeveloperEvaluation.WebApi.csproj
+dotnet ef database update --startup-project ../Ambev.DeveloperEvaluation.WebApi/Ambev.DeveloperEvaluation.WebApi.csproj
 ```
 E depois executar o database update novamente
 
-## Testando o projeto
+## 📝 Analisando o projeto
 
-Você pode utilizar os comandos dotnet test para executar os testes que foram desenvolvidos.
+### 1. Executar testes
 
-## Dados Iniciais
 
-Para acelerar o processo de verificações do projeto, alguns dados são inseridos automaticamente durante o processo de migration.
+``` 
+dotnet test
+```
+### 2. Descrição de endpoints
 
-Abaixo, estão listados os IDs deles:
+| Método | Endpoint                                 | Descrição                                        |
+|--------|------------------------------------------|--------------------------------------------------|
+| POST   | /api/Auth                                | Faça autenticação                                |
+| POST   | /api/Branch                              | Crie uma filial                                 |
+| POST   | /api/Products                            | Crie um produto                                 |
+| PUT    | /api/Products/{id}                       | Edite um produto                                |
+| GET    | /api/Products/{id}                       | Busque dados de um produto                      |
+| DELETE | /api/Products/{id}                       | Delete um produto                               |
+| POST   | /api/Sales                               | Crie uma venda (Envie ID de usuário, filial e lista de produtos) |
+| GET    | /api/Sales                               | Busque dados de todas as vendas, com paginação, filtros e ordenação |
+| GET    | /api/Sales/{id}                          | Busque uma venda pelo ID                        |
+| DELETE | /api/Sales/{id}                          | Delete uma venda                                |
+| PUT    | /api/Sales/{id}                          | Edite uma venda                                 |
+| GET    | /api/Sales/branch/{branchId}             | Busque todas as vendas de uma filial            |
+| GET    | /api/Sales/customer/{customerId}         | Busque todas as vendas de um cliente            |
+| PATCH  | /api/Sales/ChangeStatus/{id}/{status}     | Edite o status de uma venda, cancele ou desfaça o cancelamento |
 
-#### *Produtos*:
+
+---
+
+## 🔢 Testando o projeto
+
+### 1. Utilizando os endpoints
+
+Inicie sua analise fazendo uma requisição de Login com os usuários padrões:
+- POST ==http://localhost:7181/api/Auth==
+``` json
+{
+    "email": carlos.oliveira@example.com
+    "password": "Senha1234!"
+}
+```
+
+### 1. Dados Iniciais
+
+Para facilitar os testes, alguns dados são inseridos automaticamente durante a mgiração. Aqui estão os IDs principais:
+
+#### 🍒 *Produtos*:
 - 2555343d-facf-4c33-b8a6-5fad76be36a3
 - 0f038ef4-2b67-4b7b-9454-801ab6581f54
 - ccc9047b-23d4-4260-b29e-2b9c0229bf86
@@ -89,24 +147,24 @@ Abaixo, estão listados os IDs deles:
 - 1ce1afda-b45d-41ea-a2f4-3c4554154aa6
 - eb938eb0-572a-4ae2-953a-2bd55e1709bc
 
-#### *Usuários*:
+#### 👨️🎓 *Usuários*:
 - ffb140dc-53be-48d5-8c6e-5d3f93271bff
 - bb6f91f2-1720-4191-9022-24254953fa18
 - 0af35800-836a-418a-8a44-f9d21b832fa2
 
-#### *Filiais*:
+#### 🏢  *Filiais*:
 - e49c076d-3046-4399-8d41-94cc9bb65dc0
 - c34d2387-e900-4704-9fe4-09bfaa50f0e1
 - f2495571-1390-411a-9bfd-669185afea64
 
-#### *Vendas (Sales)*:
+#### 🛒 *Vendas (Sales)*:
 - 6fc34cef-afed-4edb-ab5f-44a1e2eea0a9
 - 62bad870-cf24-4dee-8470-988fb0ee3361
 - e8765c98-ce78-4090-ae9a-903101d023c1
 - a37f6397-3a09-435f-829d-a19c19728a9b
 - acfeb46e-4383-48dc-af5a-9d1d6444504
 
-#### *Produtos de Venda (SaleProduct)*:
+#### 🛒🍒 *Produtos de Venda (SaleProduct)*:
 - 019e40fb-fd1a-4edb-a061-b036060c1a64
 - 4b263c2b-d9ad-4149-9e41-0ca45977f7f2
 - 60e1e8fd-8346-4210-a01e-8a1ee795435b
