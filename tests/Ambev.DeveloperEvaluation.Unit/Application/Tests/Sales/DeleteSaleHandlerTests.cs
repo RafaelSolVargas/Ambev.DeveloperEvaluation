@@ -3,6 +3,7 @@ using NSubstitute;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
@@ -10,11 +11,12 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
     {
         private readonly ISaleRepository _saleRepository;
         private readonly DeleteSaleHandler _handler;
-
+        private readonly IConnectionMultiplexer _redis;
         public DeleteSaleHandlerTests()
         {
+            _redis = Substitute.For<IConnectionMultiplexer>();
             _saleRepository = Substitute.For<ISaleRepository>();
-            _handler = new DeleteSaleHandler(_saleRepository);
+            _handler = new DeleteSaleHandler(_saleRepository, _redis);
         }
 
         [Fact]

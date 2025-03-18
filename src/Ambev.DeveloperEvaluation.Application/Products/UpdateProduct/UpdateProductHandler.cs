@@ -1,11 +1,17 @@
+using Ambev.DeveloperEvaluation.Domain.Cache;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using FluentValidation;
 using MediatR;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Application.Products.UpdateProduct
 {
-    public class UpdateProductHandler(IProductRepository _productRepository) : IRequestHandler<UpdateProductCommand, UpdateProductResult>
+    public class UpdateProductHandler(IProductRepository _productRepository,
+        ISaleRepository saleRepository,
+        IConnectionMultiplexer redis) : IRequestHandler<UpdateProductCommand, UpdateProductResult>
     {
+        private readonly IDatabase _redisDb = redis.GetDatabase();
+
         public async Task<UpdateProductResult> Handle(UpdateProductCommand command, CancellationToken cancellationToken)
         {
             var validator = new UpdateProductCommandValidator();
@@ -30,6 +36,14 @@ namespace Ambev.DeveloperEvaluation.Application.Products.UpdateProduct
             product.UpdatedAt = DateTime.UtcNow;
 
             product = await _productRepository.UpdateAsync(product, cancellationToken);
+
+            // Clear sales cache
+            var salesWithProduct = await saleRepository.GetAllWithProduct(command.Id, cancellationToken);
+            foreach (var sale in salesWithProduct)
+            {
+                var cacheKey = $"{CacheKeys.Sales}{sale.Id}";
+                await _redisDb.KeyDeleteAsync(cacheKey);
+            }
 
             return new UpdateProductResult
             {

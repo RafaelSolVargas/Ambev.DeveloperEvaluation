@@ -1,13 +1,18 @@
+using Ambev.DeveloperEvaluation.Domain.Cache;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using MediatR;
 using Rebus.Bus;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.ChangeSaleStatus
 {
     public class ChangeSaleStatusHandler(ISaleRepository saleRepository,
-        IBus bus) : IRequestHandler<ChangeSaleStatusQuery, bool>
+        IBus bus,
+        IConnectionMultiplexer redis) : IRequestHandler<ChangeSaleStatusQuery, bool>
     {
+        private readonly IDatabase _redisDb = redis.GetDatabase();
+
         public async Task<bool> Handle(ChangeSaleStatusQuery query, CancellationToken cancellationToken)
         {
             var sale = await saleRepository.GetByIdAsync(query.Id, cancellationToken);
@@ -25,6 +30,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.ChangeSaleStatus
             sale.Status = query.NewStatus;
 
             await saleRepository.UpdateAsync(sale, cancellationToken);
+
+            var cacheKey = $"{CacheKeys.Sales}{query.Id}";
+            await _redisDb.KeyDeleteAsync(cacheKey);
 
             if (sale.Status == Domain.Enums.SaleStatus.Cancelled)
             {

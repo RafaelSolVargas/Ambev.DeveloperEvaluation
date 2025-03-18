@@ -30,7 +30,7 @@ public class SaleProfile : Profile
             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
 
         CreateMap<GetSaleProductResult, GetSaleProductResponse>()
-            .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
             .ForMember(dest => dest.UnitPrice, opt => opt.MapFrom(src => src.UnitPrice))
             .ForMember(dest => dest.FixedDiscount, opt => opt.MapFrom(src => src.FixedDiscount))

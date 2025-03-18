@@ -20,39 +20,6 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 [Route("api/[controller]")]
 public class SalesController(IMediator mediator, IMapper mapper) : BaseController
 {
-    [HttpPost]
-    [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequest request, CancellationToken cancellationToken)
-    {
-        var validator = new CreateSaleRequestValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
-
-        if (!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.Errors);
-        }
-
-        var command = new CreateSaleCommand
-        {
-            Number = request.Number,
-            DateSold = request.DateSold,
-            CustomerId = request.CustomerId,
-            BranchId = request.BranchId,
-            Products = request.Products.Select(x => new CreateSaleProductCommand()
-            {
-                ProductId = x.ProductId,
-                Quantity = x.Quantity,
-                UnitPrice = x.UnitPrice,
-            }).ToList()
-        };
-
-        var result = await mediator.Send(command, cancellationToken);
-        var response = mapper.Map<CreateSaleResponse>(result);
-
-        return Ok(response);
-    }
-
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiResponseWithData<GetSaleByIdResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
@@ -156,10 +123,43 @@ public class SalesController(IMediator mediator, IMapper mapper) : BaseControlle
         return OkPaginated(result.ConvertToType(itens));
     }
 
+    [HttpPost]
+    [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequest request, CancellationToken cancellationToken)
+    {
+        var validator = new CreateSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(validationResult.Errors);
+        }
+
+        var command = new CreateSaleCommand
+        {
+            Number = request.Number,
+            DateSold = request.DateSold,
+            CustomerId = request.CustomerId,
+            BranchId = request.BranchId,
+            Products = request.Products.Select(x => new CreateSaleProductCommand()
+            {
+                ProductId = x.ProductId,
+                Quantity = x.Quantity,
+                UnitPrice = x.UnitPrice,
+            }).ToList()
+        };
+
+        var result = await mediator.Send(command, cancellationToken);
+        var response = mapper.Map<CreateSaleResponse>(result);
+
+        return Ok(response);
+    }
+
     [HttpPatch("ChangeStatus/{saleId}/{status}")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllSalesByCostumer(
+    public async Task<IActionResult> ChangeStaus(
     [FromRoute] Guid saleId,
     [FromRoute] SaleStatus status,
     CancellationToken cancellationToken = default)

@@ -6,6 +6,9 @@ using FluentAssertions;
 using NSubstitute;
 using Xunit;
 using AutoMapper;
+using StackExchange.Redis;
+using Ambev.DeveloperEvaluation.Domain.Cache;
+using Newtonsoft.Json;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
@@ -15,17 +18,84 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
         private readonly IUserRepository _userRepository;
         private readonly IBranchRepository _branchRepository;
         private readonly IProductRepository _productRepository;
+        private readonly IConnectionMultiplexer _redis;
         private readonly GetSaleByIdHandler _handler;
         private readonly IMapper _mapper;
-
+        private readonly IDatabase _redisDb;
         public GetSaleByIdHandlerTests()
         {
             _saleRepository = Substitute.For<ISaleRepository>();
             _userRepository = Substitute.For<IUserRepository>();
             _branchRepository = Substitute.For<IBranchRepository>();
+            _redis = Substitute.For<IConnectionMultiplexer>();
             _productRepository = Substitute.For<IProductRepository>();
             _mapper = Substitute.For<IMapper>();
-            _handler = new GetSaleByIdHandler(_saleRepository, _userRepository, _productRepository, _branchRepository, _mapper);
+            _redisDb = Substitute.For<IDatabase>();
+            _redis.GetDatabase().Returns(_redisDb);
+            _handler = new GetSaleByIdHandler(_saleRepository, _userRepository, _productRepository, _branchRepository, _mapper, _redis);
+        }
+
+        [Fact(DisplayName = "Given valid sale ID. When getting sale and cache is populated. Returns sale details from cache.")]
+        public async Task Handle_CacheHit_ReturnsSaleDetailsFromCache()
+        {
+            // Arrange
+            var saleId = Guid.NewGuid();
+            var cachedSale = new GetSaleByIdResult
+            {
+                Id = saleId,
+                Number = "123",
+                DateSold = DateTime.UtcNow,
+                Customer = new GetCustomerResult { Id = Guid.NewGuid() },
+                Branch = new GetBranchResult { Id = Guid.NewGuid() },
+                Products = [],
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _redisDb.StringGetAsync($"{CacheKeys.Sales}{saleId}").Returns(JsonConvert.SerializeObject(cachedSale));
+
+            var query = new GetSaleByIdQuery { Id = saleId };
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.Should().NotBeNull();
+            result!.Id.Should().Be(saleId);
+
+            // Verifica se o repositório não foi chamado
+            await _saleRepository.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+            await _userRepository.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+            await _branchRepository.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+        }
+
+        [Fact(DisplayName = "Given non-existent sale ID. When getting sale. Returns null and does not store in cache.")]
+        public async Task Handle_NonExistentSaleId_ReturnsNullAndDoesNotStoreInCache()
+        {
+            // Arrange
+            var saleId = Guid.NewGuid();
+            _saleRepository.GetByIdAsync(saleId, Arg.Any<CancellationToken>()).Returns((Sale)null!);
+
+            var query = new GetSaleByIdQuery { Id = saleId };
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.Should().BeNull();
+
+            // Verifica se a cache não foi alterada
+            await _redisDb.DidNotReceive().StringSetAsync(
+                Arg.Any<RedisKey>(), // Use RedisKey em vez de string
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan?>(), // Use TimeSpan? em vez de TimeSpan
+                Arg.Any<When>(),      // Adicione When
+                Arg.Any<CommandFlags>() // Adicione CommandFlags
+            );
+
+            await _saleRepository.Received(1).GetByIdAsync(saleId, Arg.Any<CancellationToken>());
+            await _userRepository.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
+            await _branchRepository.DidNotReceive().GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
         }
 
         [Fact(DisplayName = "Given valid sale ID. When getting sale. Returns sale details.")]

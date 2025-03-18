@@ -9,6 +9,7 @@ using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.WebApi;
 
@@ -71,6 +72,12 @@ public class Program
             app.UseBasicHealthChecks();
 
             app.MapControllers();
+
+            var redis = app.Services.GetRequiredService<IConnectionMultiplexer>();
+            var db = redis.GetDatabase();
+            var pingResult = db.Ping();
+
+            Log.Information($"Redis ping result: {pingResult}");
 
             app.Run();
         }

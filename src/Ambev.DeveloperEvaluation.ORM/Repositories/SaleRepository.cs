@@ -16,6 +16,16 @@ public class SaleRepository(DefaultContext _context) : BaseRepository<Sale>(_con
         return exists;
     }
 
+    public async Task<List<Sale>> GetAllWithProduct(Guid productId, CancellationToken cancellationToken = default)
+    {
+        // Buscar todas as vendas que possuem o produto com o productId
+        var sales = await _context.Sales
+            .Where(sale => sale.SaleProducts.Any(sp => sp.ProductId == productId))
+            .ToListAsync(cancellationToken);
+
+        return sales;
+    }
+
     public new async Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _context.Sales

@@ -27,6 +27,7 @@ services:
       - ASPNETCORE_HTTPS_PORTS=7182
       - RABBITMQ_HOST=ambev.developerevaluation.rabbitmq 
       - DATABASE_HOST=ambev.developerevaluation.database 
+      - REDIS_HOST=ambev.developerevaluation.cache
     ports:
       - "7181:7181"
       - "7182:7182"

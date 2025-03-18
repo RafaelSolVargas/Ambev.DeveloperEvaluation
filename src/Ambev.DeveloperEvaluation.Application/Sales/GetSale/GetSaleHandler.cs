@@ -1,6 +1,9 @@
+using Ambev.DeveloperEvaluation.Domain.Cache;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using MediatR;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
 {
@@ -9,10 +12,21 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
         IUserRepository userRepository,
         IProductRepository productRepository,
         IBranchRepository branchRepository,
-        IMapper mapper) : IRequestHandler<GetSaleByIdQuery, GetSaleByIdResult?>
+        IMapper mapper,
+        IConnectionMultiplexer redis) : IRequestHandler<GetSaleByIdQuery, GetSaleByIdResult?>
     {
+        private readonly IDatabase _redisDb = redis.GetDatabase();
+
         public async Task<GetSaleByIdResult?> Handle(GetSaleByIdQuery query, CancellationToken cancellationToken)
         {
+            var cacheKey = $"{CacheKeys.Sales}{query.Id}";
+            var cachedSale = await _redisDb.StringGetAsync(cacheKey);
+
+            if (cachedSale.HasValue)
+            {
+                return JsonConvert.DeserializeObject<GetSaleByIdResult>(cachedSale!);
+            }
+
             var sale = await saleRepository.GetByIdAsync(query.Id, cancellationToken);
 
             if (sale == null)
@@ -32,6 +46,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
 
                 productsResponse.Add(new GetSaleProductResult
                 {
+                    Id = saleProduct.Id,
                     ProductId = saleProduct.ProductId,
                     Quantity = saleProduct.Quantity,
                     UnitPrice = saleProduct.UnitPrice,
@@ -44,8 +59,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
                 });
             }
 
-            // Retorna a resposta
-            return new GetSaleByIdResult
+            var response = new GetSaleByIdResult
             {
                 Id = sale.Id,
                 Number = sale.Number,
@@ -56,6 +70,10 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
                 CreatedAt = sale.CreatedAt,
                 UpdatedAt = sale.UpdatedAt
             };
+
+            await _redisDb.StringSetAsync(cacheKey, JsonConvert.SerializeObject(response), TimeSpan.FromMinutes(10));
+
+            return response;
         }
     }
 }

@@ -5,6 +5,7 @@ using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Rebus.Bus;
 using Ambev.DeveloperEvaluation.Domain.Events;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
 {
@@ -13,12 +14,14 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Sales
         private readonly ISaleRepository _saleRepository;
         private readonly UpdateSaleHandler _handler;
         private readonly IBus _bus;
+        private readonly IConnectionMultiplexer _redis;
 
         public UpdateSaleHandlerTests()
         {
+            _redis = Substitute.For<IConnectionMultiplexer>();
             _saleRepository = Substitute.For<ISaleRepository>();
             _bus = Substitute.For<IBus>();
-            _handler = new UpdateSaleHandler(_saleRepository, _bus);
+            _handler = new UpdateSaleHandler(_saleRepository, _bus, _redis);
         }
 
         [Fact]

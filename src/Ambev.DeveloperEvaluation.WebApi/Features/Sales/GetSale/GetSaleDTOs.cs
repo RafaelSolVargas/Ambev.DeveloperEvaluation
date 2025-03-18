@@ -1,7 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
-using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
-
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 
 public class GetSaleByIdResponse
 {
@@ -22,7 +19,7 @@ public class GetSaleByIdResponse
 
 public class GetSaleProductResponse
 {
-    public Guid ProductId { get; set; }
+    public Guid Id { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal FixedDiscount { get; set; }

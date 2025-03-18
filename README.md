@@ -3,13 +3,19 @@
 Bem-vindo ao repositório da aplicação **Ambev Developer Evaluation**!
 Este projeto é uma aplicação web API desenvolvida em .NET que gerencia vendas, produtos, filiais e usuários. 
 Ele utiliza Docker para facilitar a execução e integração de todos os componentes necessários, 
-como banco de dados PostgreSQL, RabbitMQ e a própria API.
+como banco de dados PostgreSQL, RabbitMQ, Redis como cache e a API em .NET 8.
 
 ---
 
 ## Visão Geral
 
-Este projeto foi desenvolvido para avaliar habilidades de desenvolvimento, utilizando tecnologias modernas e boas práticas de engenharia de software. A aplicação é composta por uma API RESTful que gerencia operações de vendas, produtos, filiais e usuários, com suporte a mensageria via RabbitMQ para eventos como criação, modificação e cancelamento de vendas.
+Este projeto foi desenvolvido para avaliar habilidades de desenvolvimento, 
+utilizando tecnologias modernas e boas práticas de engenharia de software. 
+A aplicação é composta por uma API RESTful que gerencia operações de vendas, 
+produtos, filiais e usuários, com suporte a mensageria via RabbitMQ para eventos como criação, 
+modificação e cancelamento de vendas.
+
+Foi implementado uma cache usando o Redis que está em torno do handler **GetSaleById**. Outros handlers foram modificados para garantir a consistência do sistema.
 
 ### Tecnologias Utilizadas
 
@@ -18,6 +24,7 @@ Este projeto foi desenvolvido para avaliar habilidades de desenvolvimento, utili
 - **PostgreSQL**: Banco de dados relacional para armazenamento de dados.
 - **RabbitMQ**: Sistema de mensageria para eventos assíncronos.
 - **Rebus**: Biblioteca para integração com RabbitMQ.
+- **Redis**: Banco de dados light para cache.
 
 ---
 
@@ -52,6 +59,7 @@ Isso levantará os seguintes serviços:
 - **ambev.developerevaluation.webapi**: Aplicação Web API.
 - **ambev.developerevaluation.database**: Banco de dados PostgreSQL.
 - **ambev.developerevaluation.rabbitmq**: Servidor RabbitMQ para mensageria.
+- **ambev.developerevaluation.cache**: Servidor Redis para cache.
 
 ### 3. Analise as aplicações levantadas
 
@@ -142,6 +150,7 @@ Verifique as Sales já cadastradas:
 
 
 Crie sales para testes, essa requisição já está com IDs fixos da aplicação, mais abaixo estarão disponíveis outros IDs também fixos.
+- POST **http://localhost:7181/api/Sales**
 ``` json
 {
   "number": "NUMBERX1",
@@ -163,6 +172,32 @@ Crie sales para testes, essa requisição já está com IDs fixos da aplicação
 }
 ```
 
+Edite sales existentes
+- PUT **http://localhost:7181/api/Sales/{62bad870-cf24-4dee-8470-988fb0ee3361}**
+``` json
+{
+  "id": "62bad870-cf24-4dee-8470-988fb0ee3361",
+  "branchId": "c34d2387-e900-4704-9fe4-09bfaa50f0e1",
+  "clientId": "bb6f91f2-1720-4191-9022-24254953fa18",
+  "number": "SALE005",
+  "dateSold": "2022-03-18T05:57:24.362Z",
+  "products": [
+    {
+      "saleProductId": "e22d970d-a3ce-43ba-85e1-14ced4c267fe",
+      "productId": "eb938eb0-572a-4ae2-953a-2bd55e1709bc",
+      "quantity": 2,
+      "unitPrice": 5
+    },
+    {
+      "saleProductId": "1063acfd-e15c-4f6f-8825-ae7f9036e188",
+      "productId": "1ce1afda-b45d-41ea-a2f4-3c4554154aa6",
+      "quantity": 2,
+      "unitPrice": 5
+    }
+  ]
+}
+
+```
 
 
 

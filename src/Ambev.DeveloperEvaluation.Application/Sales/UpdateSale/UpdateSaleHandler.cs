@@ -1,16 +1,21 @@
+using Ambev.DeveloperEvaluation.Domain.Cache;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using MediatR;
 using Rebus.Bus;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 {
     public class UpdateSaleHandler(ISaleRepository _saleRepository,
-        IBus bus) : IRequestHandler<UpdateSaleCommand, bool>
+        IBus bus,
+        IConnectionMultiplexer redis) : IRequestHandler<UpdateSaleCommand, bool>
     {
-        public async Task<bool> Handle(UpdateSaleCommand request, CancellationToken cancellationToken)
+        private readonly IDatabase _redisDb = redis.GetDatabase();
+     
+        public async Task<bool> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
         {
-            var sale = await _saleRepository.GetByIdAsync(request.Id, cancellationToken);
+            var sale = await _saleRepository.GetByIdAsync(command.Id, cancellationToken);
             if (sale == null)
             {
                 return false; // Venda não encontrada
@@ -18,7 +23,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 
             foreach (var saleProduct in sale.SaleProducts)
             {
-                var objectToUpdate = request.Products.FirstOrDefault(x => x.SaleProductId == saleProduct.Id);
+                var objectToUpdate = command.Products.FirstOrDefault(x => x.SaleProductId == saleProduct.Id);
 
                 if (objectToUpdate != null)
                 {
@@ -30,10 +35,10 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
                 }
             }
 
-            sale.BranchId = request.BranchId ?? sale.BranchId;
-            sale.ClientId = request.ClientId ?? sale.ClientId;
-            sale.Number = request.Number ?? sale.Number;
-            sale.DateSold = request.DateSold ?? sale.DateSold;
+            sale.BranchId = command.BranchId ?? sale.BranchId;
+            sale.ClientId = command.ClientId ?? sale.ClientId;
+            sale.Number = command.Number ?? sale.Number;
+            sale.DateSold = command.DateSold ?? sale.DateSold;
 
             await _saleRepository.UpdateAsync(sale, cancellationToken);
 
@@ -41,6 +46,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             {
                 SaleId = sale.Id,
             });
+
+            var cacheKey = $"{CacheKeys.Sales}{command.Id}";
+            await _redisDb.KeyDeleteAsync(cacheKey);
 
             return true; 
         }

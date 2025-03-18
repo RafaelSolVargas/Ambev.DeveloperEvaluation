@@ -4,18 +4,23 @@ using Xunit;
 using Ambev.DeveloperEvaluation.Application.Products.UpdateProduct;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Entities.Sales;
+using StackExchange.Redis;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Products
 {
     public class UpdateProductHandlerTests
     {
         private readonly IProductRepository _productRepository;
+        private readonly ISaleRepository _saleRepository;
         private readonly UpdateProductHandler _handler;
+        private readonly IConnectionMultiplexer _redis;
 
         public UpdateProductHandlerTests()
         {
             _productRepository = Substitute.For<IProductRepository>();
-            _handler = new UpdateProductHandler(_productRepository);
+            _saleRepository = Substitute.For<ISaleRepository>();
+            _redis = Substitute.For<IConnectionMultiplexer>();
+            _handler = new UpdateProductHandler(_productRepository, _saleRepository, _redis);
         }
 
         [Fact(DisplayName = "Given valid product. When updating product. Returns success response.")]
@@ -35,6 +40,7 @@ namespace Ambev.DeveloperEvaluation.Unit.Application.Tests.Products
             };
 
             _productRepository.GetByIdAsync(command.Id, Arg.Any<CancellationToken>()).Returns(existingProduct);
+            _saleRepository.GetAllWithProduct(command.Id, Arg.Any<CancellationToken>()).Returns([]);
             _productRepository.GetByNameAsync(command.Name, Arg.Any<CancellationToken>()).Returns((Product)null);
             _productRepository.UpdateAsync(Arg.Any<Product>(), Arg.Any<CancellationToken>()).Returns(existingProduct);
 

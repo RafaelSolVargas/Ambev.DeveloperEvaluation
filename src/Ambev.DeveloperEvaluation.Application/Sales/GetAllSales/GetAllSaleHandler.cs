@@ -74,6 +74,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetAllSales
 
                     products.Add(new GetSaleProductResult
                     {
+                        Id = saleProduct.Id,
                         ProductId = saleProduct.ProductId,
                         Quantity = saleProduct.Quantity,
                         UnitPrice = saleProduct.UnitPrice,
